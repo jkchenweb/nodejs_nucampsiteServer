@@ -189,6 +189,13 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     .then(campsite => {
 
         if(campsite && campsite.comments.id(req.params.commentId)){
+            console.log(req.user._id);
+            console.log(campsite.comments.id(req.params.commentId).author._id);
+            if(!req.user._id.equals(campsite.comments.id(req.params.commentId).author._id)){
+                err = new Error(`Campsite ${req.params.campsiteId} is not owned by ${req.user._id}`);
+                err.status = 403;
+                return next(err);
+            }
             if(req.body.rating){
                 campsite.comments.id(req.params.commentId).rating = req.body.rating;
             }
@@ -220,6 +227,11 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     .then(campsite => {
 
         if(campsite && campsite.comments.id(req.params.commentId)){
+            if(!req.user._id.equals(campsite.comments.id(req.params.commentId).author._id)){
+                err = new Error(`Campsite ${req.params.campsiteId} is not owned by ${req.user._id}`);
+                err.status = 403;
+                return next(err);
+            }
             campsite.comments.id(req.params.commentId).remove();
             campsite.save()
             .then(campsite=>{
